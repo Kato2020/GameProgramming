@@ -31,7 +31,7 @@ CMaterial::CMaterial(CModelX*model)
 	mDiffuse[1] = model->GetFloatToken();
 	mDiffuse[2] = model->GetFloatToken();
 	mDiffuse[3] = model->GetFloatToken();
-
+	
 	mPower = model->GetFloatToken();
 
 	mSpecular[0] = model->GetFloatToken();
@@ -41,6 +41,19 @@ CMaterial::CMaterial(CModelX*model)
 	mEmissive[0] = model->GetFloatToken();
 	mEmissive[1] = model->GetFloatToken();
 	mEmissive[2] = model->GetFloatToken();
+
+	printf("%s\n",mName);
+	printf("Diffuse: %f", mDiffuse[0]);
+	printf(" %f", mDiffuse[1]);
+	printf(" %f", mDiffuse[2]);
+	printf(" %f\n", mDiffuse[3]);
+	printf("Power:%f\n", mPower);
+	printf("Specular: %f", mSpecular[0]);
+	printf(" %f", mSpecular[1]);
+	printf(" %f\n", mSpecular[2]);
+	printf("Emissive: %f", mEmissive[0]);
+	printf(" %f", mEmissive[1]);
+	printf(" %f\n", mEmissive[1]);
 
 	model->GetToken(); //TextureFilename or }
 
