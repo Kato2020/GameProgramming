@@ -42,6 +42,22 @@ public:
 };
 
 /*
+CAnimation
+アニメーションクラス
+*/
+class CAnimation{
+public:
+	char*mpFrameName;//フレーム名
+	int mFrameIndex; //フレーム番号
+
+	CAnimation(CModelX*model);
+
+	~CAnimation(){
+		SAFE_DELETE_ARRAY(mpFrameName);
+	}
+};
+
+/*
 CAnimationSet
 アニメーションセット
 */
@@ -64,21 +80,6 @@ public:
 	}
 };
 
-/*
-CAnimation
-アニメーションクラス
-*/
-class CAnimation{
-public:
-	char*mpFrameName;//フレーム名
-	int mFrameIndex; //フレーム番号
-
-	CAnimation(CModelX*model);
-
-	~CAnimation(){
-		SAFE_DELETE_ARRAY(mpFrameName);
-	}
-};
 
 //CMeshクラスの定義
 class CMesh{

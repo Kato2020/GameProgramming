@@ -344,6 +344,20 @@ CSkinWeights::CSkinWeights(CModelX*model)
 		mOffset.mF[i] = model->GetFloatToken();
 	}
 	model->GetToken(); //}
+
+	//‰Û‘è10
+	printf("SkinWeights %s\n", mpFrameName);
+	for (int i = 0; i < mIndexNum; i++){
+		printf("%d %f\n", mpIndex[i],mpWeight[i]);
+	}
+	for (int i = 0; i < 16; i+=4){
+		printf("%f", mOffset.mF[i]);
+		printf(" %f", mOffset.mF[i+1]);
+		printf(" %f", mOffset.mF[i+2]);
+		printf(" %f\n", mOffset.mF[i+3]);
+	}
+
+
 }
 
 /*
