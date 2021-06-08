@@ -50,10 +50,33 @@ public:
 	//アニメーションセット名
 	char *mpName;
 
+	//アニメーション
+	std::vector<CAnimation*>mAnimation;
+
 	CAnimationSet(CModelX *model);
 
 	~CAnimationSet(){
 		SAFE_DELETE_ARRAY(mpName);
+		//アニメーションの削除
+		for (int i = 0; i < mAnimation.size(); i++){
+			delete mAnimation[i];
+		}
+	}
+};
+
+/*
+CAnimation
+アニメーションクラス
+*/
+class CAnimation{
+public:
+	char*mpFrameName;//フレーム名
+	int mFrameIndex; //フレーム番号
+
+	CAnimation(CModelX*model);
+
+	~CAnimation(){
+		SAFE_DELETE_ARRAY(mpFrameName);
 	}
 };
 
@@ -162,9 +185,10 @@ public:
 	void SkipNode();
 	//整数データの取得
 	int GetIntToken();
+	//フレーム名に該当するフレームのアドレスを返す
+	CModelXFrame*FindFrame(char*name);
 	//描画メソッド
 	void Render();
-
 };
 
 #endif
