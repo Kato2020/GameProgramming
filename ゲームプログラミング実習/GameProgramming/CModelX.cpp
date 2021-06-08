@@ -350,14 +350,12 @@ CSkinWeights::CSkinWeights(CModelX*model)
 	for (int i = 0; i < mIndexNum; i++){
 		printf("%d %f\n", mpIndex[i],mpWeight[i]);
 	}
-	for (int i = 0; i < 16; i+=4){
-		printf("%f", mOffset.mF[i]);
-		printf(" %f", mOffset.mF[i+1]);
-		printf(" %f", mOffset.mF[i+2]);
-		printf(" %f\n", mOffset.mF[i+3]);
-	}
-
-
+		for (int i = 0; i < 16; i += 4){
+			printf("%f", mOffset.mF[i]);
+			printf(" %f", mOffset.mF[i + 1]);
+			printf(" %f", mOffset.mF[i + 2]);
+			printf(" %f\n", mOffset.mF[i + 3]);
+		}
 }
 
 /*
@@ -380,6 +378,9 @@ CAnimationSet::CAnimationSet(CModelX *model)
 			mAnimation.push_back(new CAnimation(model));
 		}
 	}
+#ifdef _DEBUG
+	printf("AnimationSet:%s\n",mpName);
+#endif
 }
 
 /*
