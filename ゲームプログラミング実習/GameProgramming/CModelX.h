@@ -1,7 +1,7 @@
 #ifndef CMODELX_H //インクルードガード
 #define CMODELX_H
 
-#define MODEL_FILE "sample.blend.x"//入力ファイル名
+#define MODEL_FILE "ラグナ.x"//入力ファイル名
 
 //領域開放をマクロ化
 #define SAFE_DELETE_ARRAY(a){if(a)delete[]a;a=0;}
@@ -94,6 +94,10 @@ public:
 			delete mAnimation[i];
 		}
 	}
+
+	float mTime;    //現在時間
+	float mWeight;  //重み
+	float mMaxTime; //最大時間
 };
 
 
@@ -112,6 +116,10 @@ public:
 	std::vector<CMaterial*>mMaterial; //マテリアルデータ
 	//スキンウェイト
 	std::vector<CSkinWeights*>mSkinWeights;
+	CVector*mpAnimateVertex; //アニメーション用頂点
+	CVector*mpAnimateNormal; //アニメーション用法線
+	//テクスチャ座標データ
+	float *mpTextureCoords;
 	//コンストラクタ
 	CMesh()
 		:mVertexNum(0)
@@ -123,6 +131,9 @@ public:
 		, mMaterialNum(0)
 		, mMaterialIndexNum(0)
 		, mpMaterialIndex(nullptr)
+		, mpAnimateVertex(nullptr)
+		, mpAnimateNormal(nullptr)
+		, mpTextureCoords(nullptr)
 	{}
 	//デストラクタ
 	~CMesh(){
@@ -134,7 +145,14 @@ public:
 		for (int i = 0; i < mSkinWeights.size(); i++){
 			delete mSkinWeights[i];
 		}
+		SAFE_DELETE_ARRAY(mpAnimateVertex);
+		SAFE_DELETE_ARRAY(mpAnimateNormal);
+		SAFE_DELETE_ARRAY(mpTextureCoords);
 	}
+	//アニメーションの頂点計算を、指定した合成行列を使って計算
+	void AnimateVertex(CMatrix*);
+	//頂点にアニメーションを適用
+	void AnimateVertex(CModelX*model);
 	//読み込み処理
 	void Init(CModelX*model);
 	//描画メソッド
@@ -161,6 +179,10 @@ public:
 		//名前のエリアを解放する
 		SAFE_DELETE_ARRAY(mpName);
 	}
+	CMatrix mCombinedMatrix; //合成行列
+	//合成行列の作成
+	void AnimationCombined(CMatrix*parent);
+
 	//描画メソッド
 	void Render();
 };
@@ -176,6 +198,7 @@ public:
     std::vector<CModelXFrame*>mFrame; //フレームの配列
 	//アニメーションセットの配列
 	std::vector<CAnimationSet*>mAnimationSet;
+	std::vector<CMaterial*>mMaterial; //マテリアルの配列
 
 	CModelX()
 		:mpPointer(nullptr)
@@ -189,6 +212,10 @@ public:
 		}
 		for (int i = 0; i < mAnimationSet.size(); i++){
 			delete mAnimationSet[i];
+		}
+		//マテリアルの解放
+		for (int i = 0; i < mMaterial.size(); i++){
+			delete mMaterial[i];
 		}
 	}
 
@@ -204,6 +231,76 @@ public:
 	int GetIntToken();
 	//フレーム名に該当するフレームのアドレスを返す
 	CModelXFrame*FindFrame(char*name);
+	/*
+	AnimateFrame
+	フレームの変換行列をアニメーションデータで更新する
+	*/
+	void CModelX::AnimateFrame(){
+		//アニメーションで適用されるフレームの
+		//変換行列をゼロクリアする
+		for (int i = 0; i < mAnimationSet.size(); i++){
+			CAnimationSet*anim = mAnimationSet[i];
+			//重みが0は読み飛ばす
+			if (anim->mWeight == 0)continue;
+			//フレーム分(Animation分)繰り返す
+			for (int j = 0; j < anim->mAnimation.size(); j++){
+				CAnimation*animation = anim->mAnimation[j];
+				//該当するフレームの変換行列をゼロクリアする
+				memset(&mFrame[animation->mFrameIndex]->mTransformMatrix, 0, sizeof(CMatrix));
+			}
+		}
+		//アニメーションに該当するフレームの変換行列を
+		//アニメーションのデータで設定する
+		for (int i = 0; i < mAnimationSet.size(); i++){
+			CAnimationSet*anim = mAnimationSet[i];
+			//重みが0は飛ばす
+			if (anim->mWeight == 0)continue;
+			//フレーム分(Animation分)繰り返す
+			for (int j = 0; j < anim->mAnimation.size(); j++){
+				//フレームを取得する
+				CAnimation*animation = anim->mAnimation[j];
+				CModelXFrame*frame = mFrame[animation->mFrameIndex];
+				//キーがない場合は飛ばす
+				if (animation->mpKey == 0)continue;
+				//時間を取得
+				float time = anim->mTime;
+				//最初の時間より小さい場合
+				if (time < animation->mpKey[0].mTime){
+					//変換行列を0コマ目の行列で更新
+					frame->mTransformMatrix += animation->mpKey[0].mMatrix*anim->mWeight;
+				}
+		        //最後の時間より大きい場合
+				else if (time >= animation->mpKey[animation->mKeyNum - 1].mTime){
+					//変換行列を最後のコマの行列で更新
+					frame->mTransformMatrix += animation->mpKey[animation->mKeyNum - 1].mMatrix*anim->mWeight;
+				}
+				else{
+					//時間の途中の場合
+					for (int k = 1; k < animation->mKeyNum; k++){
+						//変換行列を、線形補間にて更新
+						if (time < animation->mpKey[k].mTime &&
+							animation->mpKey[k - 1].mTime != animation->mpKey[k].mTime){
+							float r = (animation->mpKey[k].mTime - time) /
+								(animation->mpKey[k].mTime - animation->mpKey[k - 1].mTime);
+							frame->mTransformMatrix +=
+								(animation->mpKey[k - 1].mMatrix*r + animation->mpKey[k].mMatrix*(1 - r))*anim->mWeight;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	//スキンウェイトのフレーム番号設定
+	void SetSkinWeightFrameIndex();
+	//頂点にアニメーションを適用する
+	void AnimateVertex();
+	//マテリアルの検索
+	CMaterial*FindMaterial(char*name);
+	//アニメーションの頂点計算を、指定した合成行列を使って計算
+	void AnimateVertex(CMatrix*);
+
 	//描画メソッド
 	void Render();
 };

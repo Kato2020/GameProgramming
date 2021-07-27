@@ -20,6 +20,8 @@ Materialデータの読み込みと設定
 CMaterial::CMaterial(CModelX*model)
 :mpTextureFilename(0)
 {
+	//CModelXにマテリアルを追加する
+	model->mMaterial.push_back(this);
 	model->GetToken();//{?Name
 	if (strcmp(model->mToken, "{") != 0){
 		//{でないときはマテリアル名
@@ -42,19 +44,6 @@ CMaterial::CMaterial(CModelX*model)
 	mEmissive[1] = model->GetFloatToken();
 	mEmissive[2] = model->GetFloatToken();
 
-	printf("%s\n",mName);
-	printf("Diffuse: %f", mDiffuse[0]);
-	printf(" %f", mDiffuse[1]);
-	printf(" %f", mDiffuse[2]);
-	printf(" %f\n", mDiffuse[3]);
-	printf("Power:%f\n", mPower);
-	printf("Specular: %f", mSpecular[0]);
-	printf(" %f", mSpecular[1]);
-	printf(" %f\n", mSpecular[2]);
-	printf("Emissive: %f", mEmissive[0]);
-	printf(" %f", mEmissive[1]);
-	printf(" %f\n", mEmissive[1]);
-
 	model->GetToken(); //TextureFilename or }
 
 	if (strcmp(model->mToken, "TextureFilename") == 0){
@@ -63,6 +52,10 @@ CMaterial::CMaterial(CModelX*model)
 		model->GetToken(); //filename
 		mpTextureFilename = new char[strlen(model->mToken) + 1];
 		strcpy(mpTextureFilename, model->mToken);
+
+		//テクスチャファイルの読み込み
+		mTexture.Load(mpTextureFilename);
+
 		model->GetToken(); //}
 		model->GetToken(); //}
 	}

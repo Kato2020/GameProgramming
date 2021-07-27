@@ -155,3 +155,31 @@ CMatrix CMatrix::SetQuaternion(float x, float y, float z, float w){
 	return *this;
 		
 }
+
+//*演算子のオーバーロード
+//CMatrix *floatの演算結果を返す
+CMatrix CMatrix::operator*(const float &f){
+	CMatrix tmp; //リターン用のCMatrix変数
+	for (int i = 0; i < 16; i++){
+		tmp.mF[i] = mF[i] * f;
+	}
+	return tmp;
+}
+
+//+演算子のオーバーロード
+//CMatrix1+CMatrix2の演算結果を返す
+CMatrix CMatrix::operator+(const CMatrix &m){
+	CMatrix tmp; //リターン用のCMatrix変数
+	for (int i = 0; i < 16; i++){
+		tmp.mF[i] = mF[i] + m.mF[i];
+	}
+	return tmp;
+}
+
+//+=演算子のオーバーロード
+//CMatrix1+=CMatirix2の演算を行う
+void CMatrix::operator+=(const CMatrix &m){
+	for (int i = 0; i < 16; i++){
+		mF[i] += m.mF[i];
+	}
+}

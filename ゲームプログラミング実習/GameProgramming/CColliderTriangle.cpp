@@ -61,9 +61,4 @@ void CColliderTriangle::ChangePriority()
 	mPriority = pos.Length();
 	CCollisionManager::Get()->Remove(this); //ˆê’Uíœ
 	CCollisionManager::Get()->Add(this); //’Ç‰Á
-#ifdef _DEBUG
-
-	printf("%d,", mPriority);
-
-#endif
 }

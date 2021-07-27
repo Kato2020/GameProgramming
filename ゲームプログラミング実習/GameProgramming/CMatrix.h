@@ -39,7 +39,15 @@ public:
 	CMatrix operator*(const CMatrix &m);
 	//クオータニオンで回転行列を設定する
 	CMatrix SetQuaternion(float x, float y, float z, float w);
-
+	//*演算子のオーバーロード
+	//CMatrix *floatの演算結果を返す
+	CMatrix operator*(const float &f);
+	//+演算子のオーバーロード
+	//CMatrix1+CMatrix2の演算結果を返す
+	CMatrix operator+(const CMatrix &m);
+	//+=演算子のオーバーロード
+	//CMatrix1+=CMatirix2の演算を行う
+	void operator+=(const CMatrix &m);
 };
 #endif
 
